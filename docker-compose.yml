@@ -16,7 +16,7 @@ services:
        logging: *default-logging
        env_file: cube.env
        ports:
-         - "4000:4000"
+         - "5000:5000"
        volumes:
          - cubejs_vol:/app/node_modules
          - ./:/app/:delegated #delegates speeds up mac os volumes
@@ -41,7 +41,7 @@ services:
        ports:
          - "9999:9999"
          - "9080:3030"
-         - "3306:3306"
+         - "3305:3306"
     
     cubestore_worker_1:
        restart: always
