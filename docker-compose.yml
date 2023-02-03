@@ -87,3 +87,5 @@ volumes:
 networks:
   crm_backend:
     driver: bridge
+  host:
+    driver: host
