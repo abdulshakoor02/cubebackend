@@ -14,6 +14,8 @@ services:
        image: cubejs_main
        container_name: cubejs
        logging: *default-logging
+       networks:
+         - crm_backend
        env_file: cube.env
        ports:
          - "5000:5000"
@@ -30,7 +32,9 @@ services:
        image: cubejs/cubestore:latest
        container_name: cubejs_router
        logging: *default-logging
-       restart: always    
+       restart: always
+       networks:
+         - crm_backend
        environment:
          - CUBESTORE_SERVER_NAME=cubestore_router:9999
          - CUBESTORE_META_PORT=9999
@@ -46,6 +50,8 @@ services:
     cubestore_worker_1:
        restart: always
        image: cubejs/cubestore:latest
+       networks:
+         - crm_backend
        environment:
          - CUBESTORE_SERVER_NAME=cubestore_worker_1:9001
          - CUBESTORE_WORKER_PORT=9001
@@ -60,6 +66,8 @@ services:
     cubestore_worker_2:
       restart: always
       image: cubejs/cubestore:latest
+      networks:
+        - crm_backend
       environment:
         - CUBESTORE_SERVER_NAME=cubestore_worker_2:9001
         - CUBESTORE_WORKER_PORT=9001
@@ -75,3 +83,7 @@ services:
 volumes:
   cubejs_vol:
     driver: local
+
+networks:
+  crm_backend:
+    driver: bridge
