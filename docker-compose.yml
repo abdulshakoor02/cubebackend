@@ -15,7 +15,7 @@ services:
        container_name: cubejs
        logging: *default-logging
        networks:
-         - host
+         - crm_backend
        env_file: cube.env
        ports:
          - "5000:5000"
@@ -87,5 +87,3 @@ volumes:
 networks:
   crm_backend:
     driver: bridge
-  host:
-    driver: host
