@@ -1,0 +1,77 @@
+
+version: '2.2'
+x-logging: 
+      &default-logging
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+services:
+    cubejs:
+       build:
+         context: ./
+       image: cubejs_main
+       container_name: cubejs
+       logging: *default-logging
+       env_file: cube.env
+       ports:
+         - "4000:4000"
+       volumes:
+         - cubejs_vol:/app/node_modules
+         - ./:/app/:delegated #delegates speeds up mac os volumes
+       restart: always 
+       depends_on:
+         - cubestore_router
+         - cubestore_worker_1
+         - cubestore_worker_2
+
+    cubestore_router:
+       image: cubejs/cubestore:latest
+       container_name: cubejs_router
+       logging: *default-logging
+       restart: always    
+       environment:
+         - CUBESTORE_SERVER_NAME=cubestore_router:9999
+         - CUBESTORE_META_PORT=9999
+         - CUBESTORE_WORKERS=cubestore_worker_1:9001,cubestore_worker_2:9001
+         - CUBESTORE_REMOTE_DIR=/data
+       volumes:
+         - /data:/cube/data
+       ports:
+         - "9999:9999"
+         - "9080:3030"
+         - "3306:3306"
+    
+    cubestore_worker_1:
+       restart: always
+       image: cubejs/cubestore:latest
+       environment:
+         - CUBESTORE_SERVER_NAME=cubestore_worker_1:9001
+         - CUBESTORE_WORKER_PORT=9001
+         - CUBESTORE_META_ADDR=cubestore_router:9999
+         - CUBESTORE_WORKERS=cubestore_worker_1:9001,cubestore_worker_2:9001
+         - CUBESTORE_REMOTE_DIR=/data
+       depends_on:
+         - cubestore_router
+       volumes:
+         - /data:/cube/data
+
+    cubestore_worker_2:
+      restart: always
+      image: cubejs/cubestore:latest
+      environment:
+        - CUBESTORE_SERVER_NAME=cubestore_worker_2:9001
+        - CUBESTORE_WORKER_PORT=9001
+        - CUBESTORE_META_ADDR=cubestore_router:9999
+        - CUBESTORE_WORKERS=cubestore_worker_1:9001,cubestore_worker_2:9001
+        - CUBESTORE_REMOTE_DIR=/data
+      depends_on:
+        - cubestore_router
+      volumes:
+        - /data:/cube/data
+
+
+volumes:
+  cubejs_vol:
+    driver: local
